@@ -4,21 +4,45 @@ Cargo template project predefined with settings to build a Rust binary that comp
 
 ## Summary of Methods
 
-| **Case** | Control Case: Native C on Linux | Case 1: Rust on Linux | Case 2: Cross-compile Rust for Windows on Linux | Case 3: Rust on Windows via GNU | Case 4: Rust on Windows via MSVC | Control Case: Native C on Windows |
-| ----------------------------- | ----------------- | ------------------------ | -------------------- | ------------------------- | ------------------------- | -------------------- |
-| **Language**                  | C                 | Rust                     | Rust                 | Rust                      | Rust                      | C                    |
-| **Built on**                  | Linux             | Linux                    | Linux                | Windows                   | Windows                   | Windows              |
-| **Runs on**                   | Linux             | Linux                    | Windows              | Windows                   | Windows                   | Windows              |
-| **Compiled**                  | Native            | Native                   | Cross-compiled       | Native                    | Native                    | Native               |
-| **Dynamic Method**            | gcc               | xargo + strip            | N/A                  | RUSTFLAGS + cargo + strip | RUSTFLAGS + cargo + strip | MSVC                 |
-| **Dynamic Target**            | $ARCH-linux-gnu   | $ARCH-unknown-linux-gnu  | N/A                  | $ARCH-pc-windows-gnu      | $ARCH-pc-windows-msvc     | N/A                  |
-| **64-bit dynamic size**       |             6,112 |                   55,440 | N/A                  | ???                       | ???                       | ???                  |
-| **32-bit dynamic size**       |             5,460 |                   50,672 | N/A                  | ???                       | ???                       | ???                  |
-| **Dynamic target depends on** | Various .so files | Various .so files        | N/A                  | msvcrt.dll                | msvcr*.dll, ucrtbase.dll, vcruntime*.dll ??? | msvcr*.dll, ucrtbase.dll, vcruntime*.dll |
-| **Static Method**             | gcc -static       | cargo + strip            | xargo + strip        | RUSTFLAGS + cargo + strip | RUSTFLAGS + cargo + strip | MSVC                 |
-| **Static Target**             | $ARCH-linux-gnu   | $ARCH-unknown-linux-musl | $ARCH-pc-windows-gnu | $ARCH-pc-windows-gnu      | $ARCH-pc-windows-msvc     | N/A                  |
-| **64-bit static size**        |           753,560 |                  513,816 |               82,944 | ???                       | ???                       | ???                  |
-| **32-bit static size**        |           575,456 |                  513,180 |               59,406 | ???                       | ???                       | ???                  |
+### Runs on Linux
+
+| **Case** | [Control Case: Native C on Linux](#control-case-native-c-on-linux) | [Case 1: Rust on Linux](#case-1-rust-on-linux) |
+| ----------------------------- | ----------------- | ------------------------ |
+| **Language**                  | C                 | Rust                     |
+| **Built on**                  | Linux             | Linux                    |
+| **Runs on**                   | Linux             | Linux                    |
+| **Compiled**                  | Native            | Native                   |
+| **Dynamic Method**            | gcc               | xargo + strip            |
+| **Dynamic Target**            | $ARCH-linux-gnu   | $ARCH-unknown-linux-gnu  |
+| **64-bit dynamic size**       |             6,112 |                   55,440 |
+| **32-bit dynamic size**       |             5,460 |                   50,672 |
+| **Dynamic target depends on** | Various .so files | Various .so files        |
+| **Static Method**             | gcc -static       | cargo + strip            |
+| **Static Target**             | $ARCH-linux-gnu   | $ARCH-unknown-linux-musl |
+| **64-bit static size**        |           753,560 |                  513,816 |
+| **32-bit static size**        |           575,456 |                  513,180 |
+
+Notes:
+
+* For the above tests, `$ARCH` is either `x86_64` or `i686`
+
+### Runs on Windows
+
+| **Case** | [Case 2: Cross-compile Rust for Windows on Linux](#case-2-cross-compile-rust-for-windows-on-linux) | [Case 3: Rust on Windows via GNU](#case-3-rust-on-windows-via-gnu) | [Case 4: Rust on Windows via MSVC](#case-4-rust-on-windows-via-msvc) | [Control Case: Native C on Windows](#control-case-native-c-on-windows) |
+| ----------------------------- | -------------------- | ------------------------- | ------------------------- | -------------------- |
+| **Language**                  | Rust                 | Rust                      | Rust                      | C                    |
+| **Built on**                  | Linux                | Windows                   | Windows                   | Windows              |
+| **Runs on**                   | Windows              | Windows                   | Windows                   | Windows              |
+| **Compiled**                  | Cross-compiled       | Native                    | Native                    | Native               |
+| **Dynamic Method**            | N/A                  | RUSTFLAGS + cargo + strip | RUSTFLAGS + cargo + strip | MSVC                 |
+| **Dynamic Target**            | N/A                  | $ARCH-pc-windows-gnu      | $ARCH-pc-windows-msvc     | N/A                  |
+| **64-bit dynamic size**       | N/A                  | ???                       | ???                       | ???                  |
+| **32-bit dynamic size**       | N/A                  | ???                       | ???                       | ???                  |
+| **Dynamic target depends on** | N/A                  | msvcrt.dll                | msvcr*.dll, ucrtbase.dll, vcruntime*.dll ??? | msvcr*.dll, ucrtbase.dll, vcruntime*.dll |
+| **Static Method**             | xargo + strip        | RUSTFLAGS + cargo + strip | RUSTFLAGS + cargo + strip | MSVC                 |
+| **Static Target**             | $ARCH-pc-windows-gnu | $ARCH-pc-windows-gnu      | $ARCH-pc-windows-msvc     | N/A                  |
+| **64-bit static size**        |               82,944 | ???                       | ???                       | ???                  |
+| **32-bit static size**        |               59,406 | ???                       | ???                       | ???                  |
 
 Notes:
 
