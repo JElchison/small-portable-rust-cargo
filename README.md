@@ -50,6 +50,7 @@ Notes:
 
 * For the above tests, `$ARCH` is either `x86_64` or `i686`
 * `msvcrt.dll` has been present on Windows OS editions since Windows 95 OSR2
+* `ucrtbase.dll` and `vcruntime*.dll` are new since Windows 10
 
 
 ## How It Works
