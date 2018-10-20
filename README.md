@@ -28,6 +28,8 @@ Notes:
 
 ### Runs on Windows
 
+Entries above with `???` have not been attempted yet.  Feel free to submit a pull request with this data.
+
 | **Case** | [Case 2: Cross-compile Rust for Windows on Linux](#case-2-cross-compile-rust-for-windows-on-linux) | [Case 3: Rust on Windows via GNU](#case-3-rust-on-windows-via-gnu) | [Case 4: Rust on Windows via MSVC](#case-4-rust-on-windows-via-msvc) | [Control Case: Native C on Windows](#control-case-native-c-on-windows) |
 | ----------------------------- | -------------------- | ------------------------- | ------------------------- | -------------------- |
 | **Language**                  | Rust                 | Rust                      | Rust                      | C                    |
@@ -48,7 +50,6 @@ Notes:
 
 * For the above tests, `$ARCH` is either `x86_64` or `i686`
 * `msvcrt.dll` has been present on Windows OS editions since Windows 95 OSR2
-* Entries above with `???` have not been attempted yet.  Feel free to submit a pull request with this data.
 
 
 ## How It Works
