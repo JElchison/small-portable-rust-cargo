@@ -19,8 +19,8 @@ Cargo template project predefined with settings to build a Rust binary that comp
 | **Dynamic target depends on** | Various .so files | Various .so files        |
 | **Static Method**             | gcc -static       | cargo + strip            |
 | **Static Target**             | $ARCH-linux-gnu   | $ARCH-unknown-linux-musl |
-| **64-bit static size**        |           753,560 |                  513,816 |
-| **32-bit static size**        |           575,456 |                  513,180 |
+| **64-bit static size**        |           753,560 |                  210,408 |
+| **32-bit static size**        |           575,456 |                  205,800 |
 
 Notes:
 
@@ -44,7 +44,7 @@ Entries above with `???` have not been attempted yet.  Feel free to submit a pul
 | **Static Method**             | xargo + strip        | RUSTFLAGS + cargo + strip | RUSTFLAGS + cargo + strip | MSVC                 |
 | **Static Target**             | $ARCH-pc-windows-gnu | $ARCH-pc-windows-gnu      | $ARCH-pc-windows-msvc     | N/A                  |
 | **64-bit static size**        |               82,944 | ???                       | ???                       | ???                  |
-| **32-bit static size**        |               59,406 | ???                       | ???                       | ???                  |
+| **32-bit static size**        |               58,894 | ???                       | ???                       | ???                  |
 
 Notes:
 
@@ -64,7 +64,7 @@ Supporting documentation is linked below, but here are the tidbits that accompli
 * Use `musl` for a lighter-weight libc, when possible
 * Use `xargo` to rebuild `std` and `core` with optimizations, when possible
     * See specific contents of `Xargo.toml`
-* Use the system allocator instead of `jemalloc`
+* Use the system allocator instead of `jemalloc` (now default, at least in nightly channel)
 
 For explanations, please see linked documentation below.
 
@@ -113,7 +113,7 @@ Mimic the below benchmark below that matches your desired profile.
 My test machine:
 ```
 $ uname -a
-Linux xxxxxx 4.15.0-36-generic #39-Ubuntu SMP Mon Sep 24 16:19:09 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+Linux xxxxxx 4.15.0-38-generic #41-Ubuntu SMP Wed Oct 10 10:59:38 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
 
 $ lsb_release -a
 No LSB modules are available.
@@ -134,10 +134,10 @@ Thread model: posix
 gcc version 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04)
 
 $ rustc --version
-rustc 1.31.0-nightly (14f42a732 2018-10-14)
+rustc 1.32.0-nightly (13dab66a6 2018-11-05)
 
 $ cargo --version
-cargo 1.31.0-nightly (5dbac9888 2018-10-08)
+cargo 1.32.0-nightly (1fa308820 2018-10-31)
 ```
 
 To set up cross-compilation:
@@ -178,9 +178,9 @@ $ file hello
 hello: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=4ac928420208c7297ee7fbe6677e4909bb0a86ac, stripped
 
 $ ldd hello
-	linux-vdso.so.1 (0x00007fffbc71a000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f7aad7a2000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007f7aadd95000)
+	linux-vdso.so.1 (0x00007ffd35f49000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f8eb77c8000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f8eb7dbb000)
 
 $ stat --printf="%s\n" hello
 6112
@@ -197,11 +197,11 @@ $ file hello
 hello: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d016548dd0e2649c193b8ea85ba5a0a6b7d15a9e, stripped
 
 $ ldd hello
-	linux-gate.so.1 (0xf7f05000)
-	libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0xf7cfc000)
-	/lib/ld-linux.so.2 (0xf7f07000)
+	linux-gate.so.1 (0xf7f73000)
+	libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0xf7d6a000)
+	/lib/ld-linux.so.2 (0xf7f75000)
 
-$ stat --printf="%s\n" hello                              
+$ stat --printf="%s\n" hello
 5460
 ```
 
@@ -218,7 +218,7 @@ hello: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically link
 $ ldd hello
 	not a dynamic executable
 
-$ stat --printf="%s\n" hello                                 
+$ stat --printf="%s\n" hello
 753560
 ```
 
@@ -235,7 +235,7 @@ hello: ELF 32-bit LSB executable, Intel 80386, version 1 (GNU/Linux), statically
 $ ldd hello
 	not a dynamic executable
 
-$ stat --printf="%s\n" hello                                      
+$ stat --printf="%s\n" hello
 575456
 ```
 
@@ -246,7 +246,7 @@ $ stat --printf="%s\n" hello
 ```
 $ xargo build --release --target=x86_64-unknown-linux-gnu
    Compiling hello_cargo v0.1.0
-    Finished release [optimized] target(s) in 0.97s                                                                                    
+    Finished release [optimized] target(s) in 0.97s
 
 $ strip target/x86_64-unknown-linux-gnu/release/hello_cargo
 
@@ -254,13 +254,13 @@ $ target/x86_64-unknown-linux-gnu/release/hello_cargo
 Hello, world!
 
 $ file target/x86_64-unknown-linux-gnu/release/hello_cargo
-target/x86_64-unknown-linux-gnu/release/hello_cargo: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=b8548fc469e6a2f3e6c11e43886f0c7aed979e88, stripped
+target/x86_64-unknown-linux-gnu/release/hello_cargo: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=8da5462f35605464cd0c4171d5af47e295ac6edf, stripped
 
 $ ldd target/x86_64-unknown-linux-gnu/release/hello_cargo
-	linux-vdso.so.1 (0x00007ffd4addd000)
-	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f0670551000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f0670160000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007f067097e000)
+	linux-vdso.so.1 (0x00007ffdbe52f000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f897eb4d000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f897e75c000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f897ef7a000)
 
 $ stat --printf="%s\n" target/x86_64-unknown-linux-gnu/release/hello_cargo
 55440
@@ -270,7 +270,7 @@ $ stat --printf="%s\n" target/x86_64-unknown-linux-gnu/release/hello_cargo
 ```
 $ xargo build --release --target=i686-unknown-linux-gnu
    Compiling hello_cargo v0.1.0
-    Finished release [optimized] target(s) in 1.29s                                                                                    
+    Finished release [optimized] target(s) in 1.29s
 
 $ strip target/i686-unknown-linux-gnu/release/hello_cargo
 
@@ -278,15 +278,15 @@ $ target/i686-unknown-linux-gnu/release/hello_cargo
 Hello, world!
 
 $ file target/i686-unknown-linux-gnu/release/hello_cargo
-target/i686-unknown-linux-gnu/release/hello_cargo: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=808cc42c6e0e034cda98a852e4d0f0a3da406513, stripped
+target/i686-unknown-linux-gnu/release/hello_cargo: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=096bdd4c512db3731178539a45379d5fb4ea08dd, stripped
 
 $ ldd target/i686-unknown-linux-gnu/release/hello_cargo
-	linux-gate.so.1 (0xf7f2d000)
-	libpthread.so.0 => /lib/i386-linux-gnu/libpthread.so.0 (0xf7ed6000)
-	libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0xf7cfa000)
-	/lib/ld-linux.so.2 (0xf7f2f000)
+	linux-gate.so.1 (0xf7f23000)
+	libpthread.so.0 => /lib/i386-linux-gnu/libpthread.so.0 (0xf7ecc000)
+	libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0xf7cf0000)
+	/lib/ld-linux.so.2 (0xf7f25000)
 
-$ stat --printf="%s\n" target/i686-unknown-linux-gnu/release/hello_cargo  
+$ stat --printf="%s\n" target/i686-unknown-linux-gnu/release/hello_cargo
 50672
 ```
 
@@ -294,7 +294,7 @@ $ stat --printf="%s\n" target/i686-unknown-linux-gnu/release/hello_cargo
 ```
 $ cargo build --release --target=x86_64-unknown-linux-musl
    Compiling hello_cargo v0.1.0
-    Finished release [optimized] target(s) in 3.01s                                                                                    
+    Finished release [optimized] target(s) in 3.01s
 
 $ strip target/x86_64-unknown-linux-musl/release/hello_cargo
 
@@ -302,20 +302,20 @@ $ target/x86_64-unknown-linux-musl/release/hello_cargo
 Hello, world!
 
 $ file target/x86_64-unknown-linux-musl/release/hello_cargo
-target/x86_64-unknown-linux-musl/release/hello_cargo: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, BuildID[sha1]=3c2b1868a8e56e8f29e06f990e4dc0da08b58fb3, stripped
+target/x86_64-unknown-linux-musl/release/hello_cargo: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, BuildID[sha1]=ee42ac3330bbfdb9c2b81ab79e97d93db6c1e7b0, stripped
 
 $ ldd target/x86_64-unknown-linux-musl/release/hello_cargo
 	not a dynamic executable
 
 $ stat --printf="%s\n" target/x86_64-unknown-linux-musl/release/hello_cargo
-513816
+210408
 ```
 
 #### 32-bit Static
 ```
-$ cargo build --release --target=i686-unknown-linux-musl        
+$ cargo build --release --target=i686-unknown-linux-musl
    Compiling hello_cargo v0.1.0
-    Finished release [optimized] target(s) in 3.10s                                                                                    
+    Finished release [optimized] target(s) in 3.10s
 
 $ strip target/i686-unknown-linux-musl/release/hello_cargo
 
@@ -323,13 +323,13 @@ $ target/i686-unknown-linux-musl/release/hello_cargo
 Hello, world!
 
 $ file target/i686-unknown-linux-musl/release/hello_cargo
-target/i686-unknown-linux-musl/release/hello_cargo: ELF 32-bit LSB executable, Intel 80386, version 1 (GNU/Linux), statically linked, BuildID[sha1]=8ec9cd5a73b88a10e23be2151f96f9f13ec3c3ca, stripped
+target/i686-unknown-linux-musl/release/hello_cargo: ELF 32-bit LSB executable, Intel 80386, version 1 (GNU/Linux), statically linked, BuildID[sha1]=47a744ce3ce89d0016bbd6dc382454fcae4f2e7a, stripped
 
 $ ldd target/i686-unknown-linux-musl/release/hello_cargo
 	not a dynamic executable
 
-$ stat --printf="%s\n" target/i686-unknown-linux-musl/release/hello_cargo  
-513180
+$ stat --printf="%s\n" target/i686-unknown-linux-musl/release/hello_cargo
+205800
 ```
 
 
@@ -341,7 +341,7 @@ It's not possible to cross-compile dynamic builds, as far as I know.
 ```
 $ xargo build --release --target=x86_64-pc-windows-gnu
    Compiling hello_cargo v0.1.0
-    Finished release [optimized] target(s) in 0.96s                                                                                    
+    Finished release [optimized] target(s) in 0.96s
 
 $ strip target/x86_64-pc-windows-gnu/release/hello_cargo.exe
 
@@ -362,7 +362,7 @@ $ stat --printf="%s\n" target/x86_64-pc-windows-gnu/release/hello_cargo.exe
 ```
 $ xargo build --release --target=i686-pc-windows-gnu
    Compiling hello_cargo v0.1.0
-    Finished release [optimized] target(s) in 1.02s                                                                                    
+    Finished release [optimized] target(s) in 1.02s
 
 $ strip target/i686-pc-windows-gnu/release/hello_cargo.exe
 
@@ -375,8 +375,8 @@ target/i686-pc-windows-gnu/release/hello_cargo.exe: PE32 executable (console) In
 $ ldd target/i686-pc-windows-gnu/release/hello_cargo.exe
 	not a dynamic executable
 
-$ stat --printf="%s\n" target/i686-pc-windows-gnu/release/hello_cargo.exe  
-59406
+$ stat --printf="%s\n" target/i686-pc-windows-gnu/release/hello_cargo.exe
+58894
 ```
 
 
