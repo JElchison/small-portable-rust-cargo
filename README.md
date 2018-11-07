@@ -461,6 +461,7 @@ Reference
 * [Custom Allocators](https://doc.rust-lang.org/1.9.0/book/custom-allocators.html)
 * [Linkage - The Rust Reference](https://doc.rust-lang.org/reference/linkage.html)
 * [rfcs/1721-crt-static.md at master · rust-lang/rfcs](https://github.com/rust-lang/rfcs/blob/master/text/1721-crt-static.md)
+* [jemalloc removed from the standard library](https://www.reddit.com/r/rust/comments/9twam5/jemalloc_was_just_removed_from_the_standard/)
 
 Cross-compilation
 
